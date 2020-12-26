@@ -24,16 +24,11 @@ The file looks like this:
 
 BNF:
 ```
-<Key> ::= <key> ("0..9" | "a..z" | "A..Z" | "_")
-    
-<String> ::= <String> (Any printable ASCII charactor)
-    
-<Value> ::= (""" <String> """) | <Object> | <Array>
-    
+<Key> ::= ("0..9" | "a..z" | "A..Z" | "_") {"0..9" | "a..z" | "A..Z" | "_"}
+<String> ::= """ {Any printable ASCII charactor} """
+<Value> ::= <String> | <Object> | <Array>
 <Pair> ::= <Key> "=" <Value>
-    
 <Array> ::= "[" {<Value> ","} <Value> "]"
-    
 <object> ::= "{" {<Pair> ","} <Pair> "}"
 ```
 
