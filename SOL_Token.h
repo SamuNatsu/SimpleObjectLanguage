@@ -20,6 +20,11 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ * 
+ * @file    SOL_Token.h
+ * @author  SamuNatsu
+ * @version 0.1.2
+ * @brief   Token class
 **/
 
 #ifndef SOL_TOKEN_H_INCLUDED
@@ -27,8 +32,16 @@
 
 #include <string>
 
+/**
+ * @namespace
+ * @brief   Simple object language namespace
+**/
 namespace SOL {
 
+/**
+ * @enum
+ * @brief   Token types
+**/
 using TokenType = enum _tt {
     Token_EOF = 0,
     Token_Error,
@@ -42,27 +55,98 @@ using TokenType = enum _tt {
     Token_Comma
 };
 
+/**
+ * @class
+ * @brief   Token
+**/
 class Token {
     public:
+        /**
+         * @brief   Token names (C-style string)
+        **/
         static const char* TokenTypeName[10];
 
+        /**
+         * @brief   Default constructor
+        **/
         Token() = default;
-        Token(TokenType, const std::string&, int, int);
-        Token(TokenType, std::string&&, int, int);
-        Token(const Token&);
+        /**
+         * @brief   Construct token from parameters
+         * @param   type    Type enum
+         * @param   value   Value string
+         * @param   line    Line of the token
+         * @param   row     Row of the token
+        **/
+        Token(TokenType type, const std::string& value, int line, int row);
+        /**
+         * @brief   Construct token from parameters
+         * @param   type    Type enum
+         * @param   value   Value string
+         * @param   line    Line of the token
+         * @param   row     Row of the token
+        **/
+        Token(TokenType type, std::string&& value, int line, int row);
+        /**
+         * @brief   Copy constructor
+         * @param   tmp Source token
+        **/
+        Token(const Token& tmp);
+        /**
+         * @brief   Move constructor
+         * @param   tmp Source token
+        **/
         Token(Token&&);
+        /**
+         * @brief   Default destructor
+        **/
         ~Token() = default;
 
-        Token& operator=(const Token&);
-        Token& operator=(Token&&);
+        /**
+         * @brief   Assign the value to this token
+         * @param   tmp Source token
+        **/
+        Token& operator=(const Token& tmp);
+        /**
+         * @brief   Move the value to this token
+         * @param   tmp Source token
+        **/
+        Token& operator=(Token&& tmp);
 
+        /**
+         * @brief   Get token type
+        **/
         TokenType GetType() const;
+        /**
+         * @brief   Get token value
+        **/
         const std::string& GetValue() const;
+        /**
+         * @brief   Get token position in source file
+        **/
         std::string GetPosition() const;
-        void GetPosition(int&, int&) const;
+        /**
+         * @brief   Get token position in source file
+         * @param   line    Line of the token
+         * @param   row     Row of the token
+        **/
+        void GetPosition(int& line, int& row) const;
 
-        void Set(TokenType, const std::string&, int, int);
-        void Set(TokenType, std::string&&, int, int);
+        /**
+         * @brief   Set token attributes
+         * @param   type    Type enum
+         * @param   value   Value string
+         * @param   line    Line of the token
+         * @param   row     Row of the token
+        **/
+        void Set(TokenType type, const std::string& value, int line, int row);
+        /**
+         * @brief   Set token attributes
+         * @param   type    Type enum
+         * @param   value   Value string
+         * @param   line    Line of the token
+         * @param   row     Row of the token
+        **/
+        void Set(TokenType type, std::string&& value, int line, int row);
 
     private:
         TokenType m_Type = Token_EOF;
