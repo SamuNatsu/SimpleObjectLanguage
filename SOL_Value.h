@@ -20,6 +20,11 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ * 
+ * @file    SOL_Value.h
+ * @author  SamuNatsu
+ * @version 0.1.2
+ * @brief   Value class
 **/
 
 #ifndef SOL_VALUE_H_INCLUDED
@@ -29,8 +34,16 @@
 #include <vector>
 #include <unordered_map>
 
+/**
+ * @namespace
+ * @brief   Simple object language namespace
+**/
 namespace SOL {
 
+/**
+ * @enum
+ * @brief   Value types
+**/
 using ValueType = enum _vt {
     Value_Null = 0,
     Value_String,
@@ -39,50 +52,190 @@ using ValueType = enum _vt {
 };
 
 class Value;
+/**
+ * @brief   Object
+**/
 using Object = std::unordered_map<std::string, Value>;
+/**
+ * @brief   Array
+**/
 using Array = std::vector<Value>;
 
+/**
+ * @class
+ * @brief   Value
+**/
 class Value {
     public:
+        /**
+         * @brief   Value type names (C-style string)
+        **/
         static const char* ValueTypeName[4];
 
+        /**
+         * @brief   Default constructor
+        **/
         Value() = default;
-        Value(const Value&);
-        Value(Value&&);
-        Value(const std::string&);
-        Value(std::string&&);
-        Value(const char*);
-        Value(const Object&);
-        Value(Object&&);
-        Value(const Array&);
-        Value(Array&&);
-        Value(long long);
-        Value(double);
+        /**
+         * @brief   Copy constructor
+         * @param   tmp Source value
+        **/
+        Value(const Value& tmp);
+        /**
+         * @brief   Move constructor
+         * @param   tmp Source value
+        **/
+        Value(Value&& tmp);
+        /**
+         * @brief   Construct value from a string
+         * @param   tmp Source string
+        **/
+        Value(const std::string& tmp);
+        /**
+         * @brief   Construct value from a string
+         * @param   tmp Source string
+        **/
+        Value(std::string&& tmp);
+        /**
+         * @brief   Construct value from a C-style string
+         * @param   tmp Source string
+        **/
+        Value(const char* tmp);
+        /**
+         * @brief   Construct value from an object
+         * @param   tmp Source object
+        **/
+        Value(const Object& tmp);
+        /**
+         * @brief   Construct value from an object
+         * @param   tmp Source object
+        **/
+        Value(Object&& tmp);
+        /**
+         * @brief   Construct value from an array
+         * @param   tmp Source array
+        **/
+        Value(const Array& tmp);
+        /**
+         * @brief   Construct value from an array
+         * @param   tmp Source array
+        **/
+        Value(Array&& tmp);
+        /**
+         * @brief   Construct value from an integer
+         * @param   tmp Source integer
+        **/
+        Value(long long tmp);
+        /**
+         * @brief   Construct value from an float
+         * @param   tmp Source float
+        **/
+        Value(double tmp);
+        /**
+         * @brief   Default destructor
+        **/
         ~Value();
 
-        Value& operator=(const Value&);
-        Value& operator=(Value&&);
-        Value& operator=(const std::string&);
-        Value& operator=(std::string&&);
-        Value& operator=(const char*);
-        Value& operator=(const Object&);
-        Value& operator=(Object&&);
-        Value& operator=(const Array&);
-        Value& operator=(Array&&);
-        Value& operator=(long long);
-        Value& operator=(double);
-        Value& operator[](const std::string&);
-        Value& operator[](std::string&&);
-        Value& operator[](size_t);
+        /**
+         * @brief   Assign a value
+         * @param   tmp Value
+        **/
+        Value& operator=(const Value& tmp);
+        /**
+         * @brief   Assign a value
+         * @param   tmp Value
+        **/
+        Value& operator=(Value&& tmp);
+        /**
+         * @brief   Assign a value
+         * @param   tmp Value
+        **/
+        Value& operator=(const std::string& tmp);
+        /**
+         * @brief   Assign a value
+         * @param   tmp Value
+        **/
+        Value& operator=(std::string&& tmp);
+        /**
+         * @brief   Assign a value
+         * @param   tmp Value
+        **/
+        Value& operator=(const char* tmp);
+        /**
+         * @brief   Assign a value
+         * @param   tmp Value
+        **/
+        Value& operator=(const Object& tmp);
+        /**
+         * @brief   Assign a value
+         * @param   tmp Value
+        **/
+        Value& operator=(Object&& tmp);
+        /**
+         * @brief   Assign a value
+         * @param   tmp Value
+        **/
+        Value& operator=(const Array& tmp);
+        /**
+         * @brief   Assign a value
+         * @param   tmp Value
+        **/
+        Value& operator=(Array&& tmp);
+        /**
+         * @brief   Assign a value
+         * @param   tmp Value
+        **/
+        Value& operator=(long long tmp);
+        /**
+         * @brief   Assign a value
+         * @param   tmp Value
+        **/
+        Value& operator=(double tmp);
+        /**
+         * @brief   Get a value through a string
+         * @param   tmp Source string
+        **/
+        Value& operator[](const std::string& tmp);
+        /**
+         * @brief   Get a value through a string
+         * @param   tmp Source string
+        **/
+        Value& operator[](std::string&& tmp);
+        /**
+         * @brief   Get a value through an integer
+         * @param   tmp Source integer
+        **/
+        Value& operator[](size_t tmp);
 
+        /**
+         * @brief   Clear value
+        **/
         void Clear();
 
+        /**
+         * @brief   Convert value as string
+        **/
         std::string AsString() const;
+        /**
+         * @brief   Convert value as object
+        **/
         Object AsObject() const;
+        /**
+         * @brief   Convert value as array
+        **/
         Array AsArray() const;
+        /**
+         * @brief   Convert value as integer
+        **/
         long long AsInteger();
+        /**
+         * @brief   Convert value as float
+        **/
         double AsFloat();
 
+        /**
+         * @brief   Get value type
+        **/
         ValueType GetType() const;
 
     private:
