@@ -31,18 +31,19 @@
 
 namespace SOL {
 
+using ValueType = enum _vt {
+    Value_Null = 0,
+    Value_String,
+    Value_Object,
+    Value_Array
+};
+
 class Value;
 using Object = std::unordered_map<std::string, Value>;
 using Array = std::vector<Value>;
 
 class Value {
     public:
-        using ValueType = enum {
-            Value_Null = 0,
-            Value_String,
-            Value_Object,
-            Value_Array
-        };
         static const char* ValueTypeName[4];
 
         Value() = default;
@@ -311,7 +312,7 @@ double Value::AsFloat() {
     return _rtn;
 }
 
-Value::ValueType Value::GetType() const {
+ValueType Value::GetType() const {
     return m_Type;
 }
 

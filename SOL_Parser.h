@@ -68,7 +68,7 @@ bool Parser::Parse(const std::string& path) {
         return false;
     }
     m_Scanner.NextToken();
-    if (m_Scanner.GetCurrentToken().GetType() != Token::Token_LCBracket) {
+    if (m_Scanner.GetCurrentToken().GetType() != Token_LCBracket) {
         m_Error = std::string("Invalid object -> ") + m_Scanner.GetCurrentToken().GetPosition();
         return false;
     }
@@ -86,32 +86,26 @@ Object Parser::GetRoot() const {
 Value Parser::GetValue() {
     Value _value;
     switch (m_Scanner.GetCurrentToken().GetType()) {
-        case (Token::Token_Value):
-            _value = m_Scanner.GetCurrentToken().GetValue();
-            break;
-        case (Token::Token_LCBracket):
+        case (Token_Value):
+            return m_Scanner.GetCurrentToken().GetValue();
+        case (Token_LCBracket):
             _value = GetObject();
-            if (m_Exception)
-                return Value();
-            break;
-        case (Token::Token_LSBracket):
+            return m_Exception ? Value() : _value;
+        case (Token_LSBracket):
             _value = GetArray();
-            if (m_Exception)
-                return Value();
-            break;
+            return m_Exception ? Value() : _value;
         default:
-            if (m_Scanner.GetCurrentToken().GetType() == Token::Token_Error)
+            if (m_Scanner.GetCurrentToken().GetType() == Token_Error)
                 m_Error = m_Scanner.GetCurrentToken().GetValue();
             else
                 m_Error = std::string("Invalid value -> ") + m_Scanner.GetCurrentToken().GetPosition();
             m_Exception = true;
             return Value();
     }
-    return _value;
 }
 std::pair<std::string, Value> Parser::GetPair() {
-    if (m_Scanner.GetCurrentToken().GetType() != Token::Token_Key) {
-        if (m_Scanner.GetCurrentToken().GetType() == Token::Token_Error)
+    if (m_Scanner.GetCurrentToken().GetType() != Token_Key) {
+        if (m_Scanner.GetCurrentToken().GetType() == Token_Error)
             m_Error = m_Scanner.GetCurrentToken().GetValue();
         else
             m_Error = std::string("Invalid key -> ") + m_Scanner.GetCurrentToken().GetPosition();
@@ -120,8 +114,8 @@ std::pair<std::string, Value> Parser::GetPair() {
     }
     std::string _key = m_Scanner.GetCurrentToken().GetValue();
     m_Scanner.NextToken();
-    if (m_Scanner.GetCurrentToken().GetType() != Token::Token_Equal) {
-        if (m_Scanner.GetCurrentToken().GetType() == Token::Token_Error)
+    if (m_Scanner.GetCurrentToken().GetType() != Token_Equal) {
+        if (m_Scanner.GetCurrentToken().GetType() == Token_Error)
             m_Error = m_Scanner.GetCurrentToken().GetValue();
         else
             m_Error = std::string("KVP syntax error -> ") + m_Scanner.GetCurrentToken().GetPosition();
@@ -138,16 +132,16 @@ Object Parser::GetObject() {
     Object _rtn;
     m_Scanner.NextToken();
     while (1) {
-        if (m_Scanner.GetCurrentToken().GetType() == Token::Token_RCBracket)
+        if (m_Scanner.GetCurrentToken().GetType() == Token_RCBracket)
             return _rtn;
         std::pair<std::string, Value> _pair = GetPair();
         if (m_Exception)
             return Object();
         m_Scanner.NextToken();
-        if (m_Scanner.GetCurrentToken().GetType() == Token::Token_Comma)
+        if (m_Scanner.GetCurrentToken().GetType() == Token_Comma)
             m_Scanner.NextToken();
-        else if (m_Scanner.GetCurrentToken().GetType() != Token::Token_RCBracket) {
-            if (m_Scanner.GetCurrentToken().GetType() == Token::Token_Error)
+        else if (m_Scanner.GetCurrentToken().GetType() != Token_RCBracket) {
+            if (m_Scanner.GetCurrentToken().GetType() == Token_Error)
                 m_Error = m_Scanner.GetCurrentToken().GetValue();
             else
                 m_Error = std::string("Object syntax error -> ") + m_Scanner.GetCurrentToken().GetPosition();
@@ -164,16 +158,16 @@ Array Parser::GetArray() {
     Array _rtn;
     m_Scanner.NextToken();
     while (1) {
-        if (m_Scanner.GetCurrentToken().GetType() == Token::Token_RSBracket)
+        if (m_Scanner.GetCurrentToken().GetType() == Token_RSBracket)
             return _rtn;
         Value _value = GetValue();
         if (m_Exception)
             return Array();
         m_Scanner.NextToken();
-        if (m_Scanner.GetCurrentToken().GetType() == Token::Token_Comma)
+        if (m_Scanner.GetCurrentToken().GetType() == Token_Comma)
             m_Scanner.NextToken();
-        else if (m_Scanner.GetCurrentToken().GetType() != Token::Token_RSBracket) {
-            if (m_Scanner.GetCurrentToken().GetType() == Token::Token_Error)
+        else if (m_Scanner.GetCurrentToken().GetType() != Token_RSBracket) {
+            if (m_Scanner.GetCurrentToken().GetType() == Token_Error)
                 m_Error = m_Scanner.GetCurrentToken().GetValue();
             else
                 m_Error = std::string("Array syntax error -> ") + m_Scanner.GetCurrentToken().GetPosition();

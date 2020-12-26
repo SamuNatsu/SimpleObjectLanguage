@@ -29,20 +29,21 @@
 
 namespace SOL {
 
+using TokenType = enum _tt {
+    Token_EOF = 0,
+    Token_Error,
+    Token_LCBracket,
+    Token_LSBracket,
+    Token_RCBracket,
+    Token_RSBracket,
+    Token_Equal,
+    Token_Key,
+    Token_Value,
+    Token_Comma
+};
+
 class Token {
     public:
-        using TokenType = enum {
-            Token_EOF = 0,
-            Token_Error,
-            Token_LCBracket,
-            Token_LSBracket,
-            Token_RCBracket,
-            Token_RSBracket,
-            Token_Equal,
-            Token_Key,
-            Token_Value,
-            Token_Comma
-        };
         static const char* TokenTypeName[10];
 
         Token() = default;
@@ -110,7 +111,7 @@ Token& Token::operator=(Token&& tmp) {
     return *this;
 }
 
-Token::TokenType Token::GetType() const {
+TokenType Token::GetType() const {
     return m_Type;
 }
 const std::string& Token::GetValue() const {

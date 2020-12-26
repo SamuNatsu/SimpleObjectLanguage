@@ -51,7 +51,7 @@ class Scanner {
         Token m_CurrentToken;
         int m_Line = 0, m_Row = 0;
 
-        bool IsAcceptedChar(char);
+        bool IsSkippedChar(char);
         void SkipChar();
 
         Token GetValue();
@@ -80,29 +80,29 @@ void Scanner::Close() {
 void Scanner::NextToken() {
     SkipChar();
     if (m_Fin.eof()) {
-        m_CurrentToken.Set(Token::Token_EOF, "EOF", m_Line, m_Row);
+        m_CurrentToken.Set(Token_EOF, "EOF", m_Line, m_Row);
         return;
     }
     char _buff = m_Fin.get();
     ++m_Row;
     switch (_buff) {
         case ('{'):
-            m_CurrentToken.Set(Token::Token_LCBracket, "{", m_Line, m_Row);
+            m_CurrentToken.Set(Token_LCBracket, "{", m_Line, m_Row);
             break;
         case ('['):
-            m_CurrentToken.Set(Token::Token_LSBracket, "[", m_Line, m_Row);
+            m_CurrentToken.Set(Token_LSBracket, "[", m_Line, m_Row);
             break;
         case ('}'):
-            m_CurrentToken.Set(Token::Token_RCBracket, "}", m_Line, m_Row);
+            m_CurrentToken.Set(Token_RCBracket, "}", m_Line, m_Row);
             break;
         case (']'):
-            m_CurrentToken.Set(Token::Token_RSBracket, "]", m_Line, m_Row);
+            m_CurrentToken.Set(Token_RSBracket, "]", m_Line, m_Row);
             break;
         case ('='):
-            m_CurrentToken.Set(Token::Token_Equal, "=", m_Line, m_Row);
+            m_CurrentToken.Set(Token_Equal, "=", m_Line, m_Row);
             break;
         case (','):
-            m_CurrentToken.Set(Token::Token_Comma, ",", m_Line, m_Row);
+            m_CurrentToken.Set(Token_Comma, ",", m_Line, m_Row);
             break;
         case ('"'):
             m_CurrentToken = GetValue();
@@ -115,14 +115,14 @@ const Token& Scanner::GetCurrentToken() const {
     return m_CurrentToken;
 }
 
-bool Scanner::IsAcceptedChar(char tmp) {
-    return isdigit(tmp) || isalpha(tmp) || tmp == '{' || tmp == '}' || tmp == '[' || tmp == ']' || tmp == ',' || tmp == '"' || tmp == '=' || tmp == '_';
+bool Scanner::IsSkippedChar(char tmp) {
+    return tmp == ' ' || iscntrl(tmp);
 }
 void Scanner::SkipChar() {
     if (m_Fin.eof())
         return;
     char _buff = m_Fin.peek();
-    while (!IsAcceptedChar(_buff) && !m_Fin.eof()) {
+    while (IsSkippedChar(_buff) && !m_Fin.eof()) {
         if (m_Fin.get() == '\n') {
             ++m_Line;
             m_Row = 0;
@@ -135,7 +135,7 @@ void Scanner::SkipChar() {
 
 Token Scanner::GetValue() {
     if (m_Fin.eof())
-        return Token(Token::Token_EOF, "EOF", m_Line, m_Row);
+        return Token(Token_EOF, "EOF", m_Line, m_Row);
     std::string _rtn;
     char _buff;
     int _line = m_Line, _row = m_Row;
@@ -144,10 +144,10 @@ Token Scanner::GetValue() {
         ++m_Row;
         switch (_buff) {
             case ('"'):
-                return Token(Token::Token_Value, _rtn, _line,  _row);
+                return Token(Token_Value, _rtn, _line,  _row);
             case ('\\'): {
                 if (!m_Fin.eof())
-                    return Token(Token::Token_Error, "Invalid value", m_Line, m_Row);
+                    return Token(Token_Error, "Invalid value", m_Line, m_Row);
                 char __buff = m_Fin.get();
                 ++m_Row;
                 switch (__buff) {
@@ -167,33 +167,36 @@ Token Scanner::GetValue() {
                         _rtn += '\"';
                         break;
                     default:
-                        return Token(Token::Token_Error, "Invalid value", m_Line, m_Row);
+                        _rtn += '\\';
+                        _rtn += __buff;
+                        break;
                 }
                 break;
             }
             default:
                 if (iscntrl(_buff))
-                    return Token(Token::Token_Error, "Invalid value", m_Line, m_Row);
+                    return Token(Token_Error, "Invalid value", m_Line, m_Row);
                 _rtn += _buff;
         }
     }
-    return Token(Token::Token_Error, "Invalid value", m_Line, m_Row);
+    return Token(Token_Error, "Invalid value", m_Line, m_Row);
 }
 Token Scanner::GetKey(char tmp) {
     if (m_Fin.eof())
-        return Token(Token::Token_EOF, "EOF", m_Line, m_Row);
+        return Token(Token_EOF, "EOF", m_Line, m_Row);
     std::string _rtn(1, tmp);
-    char _buff;
+    char _buff = m_Fin.peek();
     int _line = m_Line, _row = m_Row;
     while (!m_Fin.eof()) {
-        _buff = m_Fin.get();
         ++m_Row;
         if (isdigit(_buff) || isalpha(_buff) || _buff == '_')
             _rtn += _buff;
         else
-            return Token(Token::Token_Key, _rtn, _line, _row);
+            return Token(Token_Key, _rtn, _line, _row);
+        m_Fin.get();
+        _buff = m_Fin.peek();
     }
-    return Token(Token::Token_Error, "Invalid Key", m_Line, m_Row);
+    return Token(Token_Key, _rtn, _line, _row);
 }
 
 }

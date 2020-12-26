@@ -5,6 +5,8 @@
 
 #include "SOL_Parser.h"
 
+#define SOL_VERSION "0.1.1"
+
 namespace {
 
 void fWriteValue(const SOL::Value&, std::ofstream&, size_t layer);
@@ -48,13 +50,13 @@ void fWriteArray(const SOL::Array& tmp, std::ofstream& f, size_t layer) {
 }
 void fWriteValue(const SOL::Value& tmp, std::ofstream& f, size_t layer) {
     switch (tmp.GetType()) {
-        case (SOL::Value::Value_String):
+        case (SOL::Value_String):
             f << '"' << tmp.AsString() << '"';
             break;
-        case (SOL::Value::Value_Object):
+        case (SOL::Value_Object):
             fWriteObject(tmp.AsObject(), f, layer);
             break;
-        case (SOL::Value::Value_Array):
+        case (SOL::Value_Array):
             fWriteArray(tmp.AsArray(), f, layer);
         default:
             break;
@@ -86,13 +88,13 @@ void cWriteArray(const SOL::Array& tmp, std::ofstream& f) {
 }
 void cWriteValue(const SOL::Value& tmp, std::ofstream& f) {
     switch (tmp.GetType()) {
-        case (SOL::Value::Value_String):
+        case (SOL::Value_String):
             f << '"' << tmp.AsString() << '"';
             break;
-        case (SOL::Value::Value_Object):
+        case (SOL::Value_Object):
             cWriteObject(tmp.AsObject(), f);
             break;
-        case (SOL::Value::Value_Array):
+        case (SOL::Value_Array):
             cWriteArray(tmp.AsArray(), f);
         default:
             break;
