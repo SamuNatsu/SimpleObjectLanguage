@@ -20,6 +20,11 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ * 
+ * @file    SOL_Parser.h
+ * @author  SamuNatsu
+ * @version 0.1.2
+ * @brief   Parser class
 **/
 
 #ifndef SML_PARSER_H_INCLUDED
@@ -28,21 +33,49 @@
 #include "SOL_Value.h"
 #include "SOL_Scanner.h"
 
+/**
+ * @namespace
+ * @brief   Simple object language namespace
+**/
 namespace SOL {
 
+/**
+ * @class
+ * @brief   Parser 
+**/
 class Parser {
     public:
+        /**
+         * @brief   Default constructor
+        **/
         Parser() = default;
         Parser(const Parser&) = delete;
+        /**
+         * @brief   Default destructor
+        **/
         ~Parser() = default;
 
         Parser& operator=(const Parser&) = delete;
 
+        /**
+         * @brief   Get error 
+        **/
         const std::string& GetError() const;
 
-        bool Parse(const std::string&);
+        /**
+         * @brief   Parser file
+         * @param   path    File path
+        **/
+        bool Parse(const std::string& path);
+        /**
+         * @brief   Parser file
+         * @param   path    File path
+        **/
         bool Parse(std::string&&);
 
+        /**
+         * @brief   Get root object
+        **/
         Object GetRoot() const;
 
     private:
