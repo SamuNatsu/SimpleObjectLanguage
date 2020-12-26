@@ -20,6 +20,11 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ * 
+ * @file    SOL_Scanner.h
+ * @author  SamuNatsu
+ * @version 0.1.2
+ * @brief   Scanner class
 **/
 
 #ifndef SOL_SCANNER_H_INCLUDED
@@ -29,21 +34,52 @@
 
 #include "SOL_Token.h"
 
+/**
+ * @namespace
+ * @brief   Simple object language namespace
+**/
 namespace SOL {
 
+/**
+ * @class
+ * @brief   Scanner
+**/
 class Scanner {
     public:
+        /**
+         * @brief   Default constructor
+        **/
         Scanner() = default;
         Scanner(const Scanner&) = delete;
+        /**
+         * @brief   Default destructor 
+        **/
         ~Scanner();
 
         Scanner& operator=(const Scanner&) = delete;
 
-        bool Open(const std::string&);
-        bool Open(std::string&&);
+        /**
+         * @brief   Open file
+         * @param   path    File path
+        **/
+        bool Open(const std::string& path);
+        /**
+         * @brief   Open file
+         * @param   path    File path
+        **/
+        bool Open(std::string&& path);
+        /**
+         * @brief   Close file
+        **/
         void Close();
 
+        /**
+         * @brief   Scan next token and put it into the buffer
+        **/
         void NextToken();
+        /**
+         * @brief   Get the token from buffer
+        **/
         const Token& GetCurrentToken() const;
 
     private:
