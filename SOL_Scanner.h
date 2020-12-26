@@ -234,7 +234,7 @@ Token Scanner::GetKey(char tmp) {
     }
     return Token(Token_Key, _rtn, _line, _row);
 }
-
+ 
 }
 
 #endif
