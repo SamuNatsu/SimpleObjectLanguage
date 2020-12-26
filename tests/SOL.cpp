@@ -1,4 +1,4 @@
-#include <cstdio>
+#include <iostream>
 
 #include "SOL.h"
 
@@ -7,11 +7,18 @@ SOL::Object root;
 
 int main() {
     if (!parser.Parse("test.sol")) {
-        puts(parser.GetError().c_str());
+        std::cerr << parser.GetError() << std::endl;
         return 0;
     }
     root = parser.GetRoot();
-    for (auto &i : root["server"].AsArray())
-        printf("name: %s\nip: %s:%s\n\n", i.AsObject()["name"].AsString().c_str(), i.AsObject()["ip"].AsString().c_str(), i.AsObject()["port"].AsString().c_str());
+
+    // Output server list
+    for (auto &server : root["server"].AsArray()) {
+        auto svr = server.AsObject();
+        std::cout << "name:\t" << svr["name"].AsString() << '\n'
+            << "ip:\t" << svr["ip"].AsString() << ':' << svr["port"].AsString() << "\n\n";
+    }
+    std::cout << std::flush;
+
     return 0;
 }
