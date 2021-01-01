@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "SOL.h"
+#include "SOL.hpp"
 
 SOL::Parser parser;
 SOL::Object root;
