@@ -41,21 +41,29 @@ class Scanner {
 
         bool Open(const std::string&);
         bool Open(std::string&&);
+        void OpenFromMemory(const std::string&);
+        void OpenFromMemory(std::string&&);
         void Close();
 
         void NextToken();
         const Token& GetCurrentToken() const;
 
     private:
+        std::string m_Memory;
+        size_t m_Memp = 0;
         std::ifstream m_Fin;
         Token m_CurrentToken;
+        bool m_Mode = false;
         int m_Line = 0, m_Column = 0;
 
         bool IsSkippedChar(char);
         void SkipChar();
+        void SkipCharM();
 
         Token GetValue();
+        Token GetValueM();
         Token GetKey(char);
+        Token GetKeyM(char);
 };
 
 }
@@ -78,14 +86,60 @@ bool Scanner::Open(const std::string& path) {
 bool Scanner::Open(std::string&& path) {
     return Open(path);
 }
+void Scanner::OpenFromMemory(const std::string& mem) {
+    Close();
+    m_Memory = mem;
+    m_Mode = true;
+}
+void Scanner::OpenFromMemory(std::string&& mem) {
+    OpenFromMemory(mem);
+}
 void Scanner::Close() {
+    m_Memory.clear();
+    m_Memp = 0;
     if (m_Fin.is_open())
         m_Fin.close();
+    m_Mode = false;
     m_Line = 1;
     m_Column = 0;
 }
 
 void Scanner::NextToken() {
+    if (m_Mode) {
+        SkipCharM();
+        if (m_Memp >= m_Memory.length()) {
+            m_CurrentToken.Set(Token_EOF, "EOF", m_Line, m_Column);
+            return;
+        }
+        char _buff = m_Memory.c_str()[m_Memp++];
+        ++m_Column;
+        switch (_buff) {
+            case ('{'):
+                m_CurrentToken.Set(Token_LCBracket, "{", m_Line, m_Column);
+                break;
+            case ('['):
+                m_CurrentToken.Set(Token_LSBracket, "[", m_Line, m_Column);
+                break;
+            case ('}'):
+                m_CurrentToken.Set(Token_RCBracket, "}", m_Line, m_Column);
+                break;
+            case (']'):
+                m_CurrentToken.Set(Token_RSBracket, "]", m_Line, m_Column);
+                break;
+            case ('='):
+                m_CurrentToken.Set(Token_Equal, "=", m_Line, m_Column);
+                break;
+            case (','):
+                m_CurrentToken.Set(Token_Comma, ",", m_Line, m_Column);
+                break;
+            case ('"'):
+                m_CurrentToken = GetValueM();
+                break;
+            default:
+                m_CurrentToken = GetKeyM(_buff);
+        }
+        return;
+    }
     SkipChar();
     if (m_Fin.eof()) {
         m_CurrentToken.Set(Token_EOF, "EOF", m_Line, m_Column);
@@ -140,6 +194,20 @@ void Scanner::SkipChar() {
         _buff = m_Fin.peek();
     }
 }
+void Scanner::SkipCharM() {
+    if (m_Memp >= m_Memory.length())
+        return;
+    char _buff = m_Memory[m_Memp];
+    while (IsSkippedChar(_buff) && m_Memp < m_Memory.length()) {
+        if (m_Memory.c_str()[m_Memp++] == '\n') {
+            ++m_Line;
+            m_Column = 0;
+        }
+        else
+            ++m_Column;
+        _buff = m_Memory.c_str()[m_Memp];
+    }
+}
 
 Token Scanner::GetValue() {
     if (m_Fin.eof())
@@ -154,9 +222,57 @@ Token Scanner::GetValue() {
             case ('"'):
                 return Token(Token_Value, _rtn, _line,  _column);
             case ('\\'): {
-                if (!m_Fin.eof())
+                if (m_Fin.eof())
                     return Token(Token_Error, "Invalid value", m_Line, m_Column);
                 char __buff = m_Fin.get();
+                ++m_Column;
+                switch (__buff) {
+                    case ('n'):
+                        _rtn += '\n';
+                        break;
+                    case ('r'):
+                        _rtn += '\r';
+                        break;
+                    case ('t'):
+                        _rtn += '\t';
+                        break;
+                    case ('\\'):
+                        _rtn += '\\';
+                        break;
+                    case ('"'):
+                        _rtn += '\"';
+                        break;
+                    default:
+                        _rtn += '\\';
+                        _rtn += __buff;
+                        break;
+                }
+                break;
+            }
+            default:
+                if (iscntrl(_buff))
+                    return Token(Token_Error, "Invalid value", m_Line, m_Column);
+                _rtn += _buff;
+        }
+    }
+    return Token(Token_Error, "Invalid value", m_Line, m_Column);
+}
+Token Scanner::GetValueM() {
+    if (m_Memp >= m_Memory.length())
+        return Token(Token_EOF, "EOF", m_Line, m_Column);
+    std::string _rtn;
+    char _buff;
+    int _line = m_Line, _column = m_Column;
+    while (m_Memp < m_Memory.length()) {
+        _buff = m_Memory.c_str()[m_Memp++];
+        ++m_Column;
+        switch (_buff) {
+            case ('"'):
+                return Token(Token_Value, _rtn, _line,  _column);
+            case ('\\'): {
+                if (m_Memp >= m_Memory.length())
+                    return Token(Token_Error, "Invalid value", m_Line, m_Column);
+                char __buff = m_Memory.c_str()[m_Memp++];
                 ++m_Column;
                 switch (__buff) {
                     case ('n'):
@@ -203,6 +319,22 @@ Token Scanner::GetKey(char tmp) {
             return Token(Token_Key, _rtn, _line, _column);
         m_Fin.get();
         _buff = m_Fin.peek();
+    }
+    return Token(Token_Key, _rtn, _line, _column);
+}
+Token Scanner::GetKeyM(char tmp) {
+    if (m_Memp >= m_Memory.length())
+        return Token(Token_EOF, "EOF", m_Line, m_Column);
+    std::string _rtn(1, tmp);
+    char _buff = m_Memory[m_Memp];
+    int _line = m_Line, _column = m_Column;
+    while (m_Memp < m_Memory.length()) {
+        ++m_Column;
+        if (isdigit(_buff) || isalpha(_buff) || _buff == '_')
+            _rtn += _buff;
+        else
+            return Token(Token_Key, _rtn, _line, _column);
+        _buff = m_Memory.c_str()[++m_Memp];
     }
     return Token(Token_Key, _rtn, _line, _column);
 }

@@ -29,14 +29,50 @@
 
 #include "SOL_Parser.hpp"
 
-#define SOL_VERSION "0.1.3"
+#define SOL_VERSION "0.1.4"
 #define SOL_VERSION_MAJOR 0
 #define SOL_VERSION_MINOR 1
-#define SOL_VERSION_PATCH 3
+#define SOL_VERSION_PATCH 4
 
 namespace {
 
-void fWriteValue(const SOL::Value&, std::ofstream&, size_t layer);
+void fWriteObject(const SOL::Object&, std::ofstream&, size_t);
+void fWriteArray(const SOL::Array&, std::ofstream&, size_t);
+void fWriteValue(const SOL::Value&, std::ofstream&, size_t);
+
+void cWriteObject(const SOL::Object&, std::ofstream&);
+void cWriteArray(const SOL::Array&, std::ofstream&);
+void cWriteValue(const SOL::Value&, std::ofstream&);
+
+std::string sWriteObject(const SOL::Object&);
+std::string sWriteArray(const SOL::Array&);
+std::string sWriteValue(const SOL::Value&);
+
+}
+
+namespace SOL {
+
+bool SaveFormatted(const Object&, const std::string&);
+bool SaveFormatted(const Object&, std::string&&);
+bool SaveFormatted(Object&&, const std::string&);
+bool SaveFormatted(Object&&, std::string&&);
+
+bool SaveCompressed(const Object&, const std::string&);
+bool SaveCompressed(const Object&, std::string&&);
+bool SaveCompressed(Object&&, const std::string&);
+bool SaveCompressed(Object&&, std::string&&);
+
+std::string Convert2String(const Object&);
+std::string Convert2String(Object&&);
+
+}
+
+#endif
+
+#ifdef SOL_IMPLEMENTATION
+
+namespace {
+
 void fWriteObject(const SOL::Object& tmp, std::ofstream& f, size_t layer) {
     f << '{';
     size_t _lmt = tmp.size(), _itx = 0;
@@ -89,7 +125,6 @@ void fWriteValue(const SOL::Value& tmp, std::ofstream& f, size_t layer) {
     }
 }
 
-void cWriteValue(const SOL::Value&, std::ofstream&);
 void cWriteObject(const SOL::Object& tmp, std::ofstream& f) {
     f << '{';
     size_t _lmt = tmp.size(), _itx = 0;
@@ -126,7 +161,6 @@ void cWriteValue(const SOL::Value& tmp, std::ofstream& f) {
     }
 }
 
-std::string sWriteValue(const SOL::Value&);
 std::string sWriteObject(const SOL::Object& tmp) {
     std::string _s(1, '{');
     size_t _lmt = tmp.size(), _itx = 0;
@@ -162,17 +196,8 @@ std::string sWriteValue(const SOL::Value& tmp) {
 
 }
 
-/**
- * @namespace
- * @brief   Simple object language namespace
-**/
 namespace SOL {
 
-/**
- * @brief   Save an object which is formatted
- * @param   root    Root object
- * @param   file    File name
-**/
 bool SaveFormatted(const Object& root, const std::string& file) {
     std::ofstream _fout(file);
     if (!_fout.is_open())
@@ -181,36 +206,16 @@ bool SaveFormatted(const Object& root, const std::string& file) {
     _fout.close();
     return true;
 }
-/**
- * @brief   Save an object which is formatted
- * @param   root    Root object
- * @param   file    File name
-**/
 bool SaveFormatted(const Object& root, std::string&& file) {
     return SaveFormatted(root, file);
 }
-/**
- * @brief   Save an object which is formatted
- * @param   root    Root object
- * @param   file    File name
-**/
 bool SaveFormatted(Object&& root, const std::string& file) {
     return SaveFormatted(root, file);
 }
-/**
- * @brief   Save an object which is formatted
- * @param   root    Root object
- * @param   file    File name
-**/
 bool SaveFormatted(Object&& root, std::string&& file) {
     return SaveFormatted(root, file);
 }
 
-/**
- * @brief   Save an object which is compressed
- * @param   root    Root object
- * @param   file    File name
-**/
 bool SaveCompressed(const Object& root, const std::string& file) {
     std::ofstream _fout(file);
     if (!_fout.is_open())
@@ -219,42 +224,19 @@ bool SaveCompressed(const Object& root, const std::string& file) {
     _fout.close();
     return true;
 }
-/**
- * @brief   Save an object which is compressed
- * @param   root    Root object
- * @param   file    File name
-**/
 bool SaveCompressed(const Object& root, std::string&& file) {
     return SaveCompressed(root, file);
 }
-/**
- * @brief   Save an object which is compressed
- * @param   root    Root object
- * @param   file    File name
-**/
 bool SaveCompressed(Object&& root, const std::string& file) {
     return SaveCompressed(root, file);
 }
-/**
- * @brief   Save an object which is compressed
- * @param   root    Root object
- * @param   file    File name
-**/
 bool SaveCompressed(Object&& root, std::string&& file) {
     return SaveCompressed(root, file);
 }
 
-/**
- * @brief   Convert an object to string which is compressed
- * @param   root    Root object
-**/
 std::string Convert2String(const Object& root) {
     return sWriteObject(root);
 }
-/**
- * @brief   Convert an object to string which is compressed
- * @param   root    Root object
-**/
 std::string Convert2String(Object&& root) {
     return Convert2String(root);
 }

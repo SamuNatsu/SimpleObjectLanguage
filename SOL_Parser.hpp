@@ -42,6 +42,8 @@ class Parser {
 
         bool Parse(const std::string&);
         bool Parse(std::string&&);
+        bool ParseFromMemory(const std::string&);
+        bool ParseFromMemory(std::string&&);
 
         Object GetRoot() const;
 
@@ -85,6 +87,19 @@ bool Parser::Parse(const std::string& path) {
 }
 bool Parser::Parse(std::string&& path) {
     return Parse(path);
+}
+bool Parser::ParseFromMemory(const std::string& mem) {
+    m_Scanner.OpenFromMemory(mem);
+    m_Scanner.NextToken();
+    if (m_Scanner.GetCurrentToken().GetType() != Token_LCBracket) {
+        m_Error = std::string("Invalid object -> ") + m_Scanner.GetCurrentToken().GetPosition();
+        return false;
+    }
+    m_Root = GetObject();
+    return !m_Exception;
+}
+bool Parser::ParseFromMemory(std::string&& mem) {
+    return ParseFromMemory(mem);
 }
 
 Object Parser::GetRoot() const {
