@@ -42,8 +42,9 @@ Some limitations:
 ```cpp
 #include <cstdio>
 
-// You SHOULD define it ONCE in any source file
+// You SHOULD define it ONLY ONCE in any source file before the header
 #define SOL_IMPLEMENTATION
+
 // This is the header we need
 #include "SOL.hpp"
 
