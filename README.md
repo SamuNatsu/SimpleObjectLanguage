@@ -5,7 +5,6 @@ A simple data switching language
 
 ## Grammar
 The file looks like this:
-
 ```
 {
     key = "value",
@@ -32,15 +31,21 @@ BNF:
 <object> ::= "{" {<Pair> ","} <Pair> "}"
 ```
 
+Some limitations:
+1. **NATIVE ONLY SUPPORT ANSCII** (But you can convert it from MultiBytes to Unicode, just modify a little bit codes)
+2. The whole file is parsed **as an object**, and you **SHOULD** write it as an object
+
 ## Quick Tutorial
-1. Download "SOL.h", "SOL_Parser.h", "SOL_Scanner.h", "SOL_Token.h", "SOL_Value.h"
+1. Download "SOL.hpp", "SOL_Parser.hpp", "SOL_Scanner.hpp", "SOL_Token.hpp", "SOL_Value.hpp"
 2. You can simply use it like this:
 
 ```cpp
 #include <cstdio>
 
+// You SHOULD define it ONCE in any source file
+#define SOL_IMPLEMENTATION
 // This is the header we need
-#include "SOL.h"
+#include "SOL.hpp"
 
 // For common using, you just need a parser and an object
 SOL::Parser parser;
@@ -59,7 +64,7 @@ int main() {
     // You can simply get/modify the elements just like objects in JavaScript(?)
     printf("%s\n", root["object"]["array"][0].AsString().c_str());
     
-    // Or you can use SOL::SaveFormatted()/SOL::SaveCompressed() to save
+    // Or you can use SOL::SaveFormatted()/SOL::SaveCompressed() and other functions to save
     SOL::SaveFormatted(root, "save.sol");
     
     return 0;
