@@ -22,8 +22,8 @@
  * SOFTWARE.
 **/
 
-#ifndef SML_PARSER_H_INCLUDED
-#define SML_PARSER_H_INCLUDED
+#ifndef SML_PARSER_HPP_INCLUDED
+#define SML_PARSER_HPP_INCLUDED
 
 #include "SOL_Value.hpp"
 #include "SOL_Scanner.hpp"

@@ -22,17 +22,17 @@
  * SOFTWARE.
 **/
 
-#ifndef SOL_H_INCLUDED
-#define SOL_H_INCLUDED
+#ifndef SOL_HPP_INCLUDED
+#define SOL_HPP_INCLUDED
 
 #include <fstream>
 
 #include "SOL_Parser.hpp"
 
-#define SOL_VERSION "0.1.4"
-#define SOL_VERSION_MAJOR 0
-#define SOL_VERSION_MINOR 1
-#define SOL_VERSION_PATCH 4
+#define SOL_VERSION "1.0.0"
+#define SOL_VERSION_MAJOR 1
+#define SOL_VERSION_MINOR 0
+#define SOL_VERSION_PATCH 0
 
 namespace {
 

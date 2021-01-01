@@ -22,8 +22,8 @@
  * SOFTWARE.
 **/
 
-#ifndef SOL_VALUE_H_INCLUDED
-#define SOL_VALUE_H_INCLUDED
+#ifndef SOL_VALUE_HPP_INCLUDED
+#define SOL_VALUE_HPP_INCLUDED
 
 #include <string>
 #include <vector>

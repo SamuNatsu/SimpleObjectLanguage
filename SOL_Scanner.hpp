@@ -22,8 +22,8 @@
  * SOFTWARE.
 **/
 
-#ifndef SOL_SCANNER_H_INCLUDED
-#define SOL_SCANNER_H_INCLUDED
+#ifndef SOL_SCANNER_HPP_INCLUDED
+#define SOL_SCANNER_HPP_INCLUDED
 
 #include <fstream>
 

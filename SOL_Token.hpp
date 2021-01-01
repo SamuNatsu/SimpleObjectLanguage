@@ -22,8 +22,8 @@
  * SOFTWARE.
 **/
 
-#ifndef SOL_TOKEN_H_INCLUDED
-#define SOL_TOKEN_H_INCLUDED
+#ifndef SOL_TOKEN_HPP_INCLUDED
+#define SOL_TOKEN_HPP_INCLUDED
 
 #include <string>
 
