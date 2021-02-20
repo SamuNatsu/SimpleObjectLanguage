@@ -1,20 +1,18 @@
 # SimpleObjectLanguage
 A simple data switching language
 
-**-----Need help to write tutorial document-----**
-
 ## Grammar
 The file looks like this:
 ```
 {
-    key = "value",
-    object = {
-        key = "object-key",
-        object = {},
-        array = ["object-array"]
+    sample_key = "sample_value",
+    sample_object = {
+        sample_key1 = "",
+        sample_key2 = {},
+        sample_key3 = []
     },
-    array = [
-        "array.key",
+    sample_array = [
+        "",
         {},
         []
     ]
@@ -23,57 +21,115 @@ The file looks like this:
 
 BNF:
 ```
-<Key> ::= ("0..9" | "a..z" | "A..Z" | "_") {"0..9" | "a..z" | "A..Z" | "_"}
-<String> ::= """ {Any printable ASCII charactor} """
+<Key> ::= ("a..z" | "A..Z" | "_") {"0..9" | "a..z" | "A..Z" | "_"}
+<String> ::= """ {UTF-8 string} """
 <Value> ::= <String> | <Object> | <Array>
 <Pair> ::= <Key> "=" <Value>
 <Array> ::= "[" {<Value> ","} <Value> "]"
 <object> ::= "{" {<Pair> ","} <Pair> "}"
 ```
 
-Some limitations:
-1. **NATIVE ONLY SUPPORT ANSCII** (But you can convert it from MultiBytes to Unicode, just modify a little bit codes)
-2. The whole file is parsed **as an object**, and you **SHOULD** write it as an object
+## Something important
+Only supports '\0', '\t', '\n', '\r', '\"', '\\' and UCS-2('\uxxxx') to be escaped and unescaped in strings.
 
-## Quick Tutorial
-1. Download "SOL.hpp", "SOL_Parser.hpp", "SOL_Scanner.hpp", "SOL_Token.hpp", "SOL_Value.hpp"
-2. You can simply use it like this:
-
+## How to use
 ```cpp
-#include <cstdio>
+#include <iostream>
 
-// You SHOULD define it ONLY ONCE in any source file before the header
-#define SOL_IMPLEMENTATION
-
-// This is the header we need
 #include "SOL.hpp"
 
-// For common using, you just need a parser and an object
 SOL::Parser parser;
-SOL::Object root;
+SOL::Object obj;
 
 int main() {
-    // Parse file
-    if (!parser.Parse("test.sol")) {
-        puts(parser.GetError().c_str());
+    // Read .sol file
+    if (!parser.ParseFromFile("test.sol")) {
+        // Get error
+        std::cerr << parser.GetError() << std::endl;
         return 0;
     }
     
-    // After parsing, you can get the object
-    root = parser.GetRoot();
+    // Get result
+    obj = parser.GetResult();
     
-    // You can simply get/modify the elements just like objects in JavaScript(?)
-    printf("%s\n", root["object"]["array"][0].AsString().c_str());
+    // Modify
+    obj["settings"] = "nul";
     
-    // Or you can use SOL::SaveFormatted()/SOL::SaveCompressed() and other functions to save
-    SOL::SaveFormatted(root, "save.sol");
+    // Convert object to formatted string
+    std::cout << parser.ParseToString(obj) << std::endl;
     
     return 0;
 }
 ```
 
-## More Details
-Once you successfully get the object for parser, all you can do with it are:
-1. Use Key to get Value:`root["Key"]`
-2. Convert Value to other types like: `root["Key"].AsString()`, `root["Key"].AsObject()` etc. (We native support AsString(), AsObject(), AsArray(), AsInteger(), AsFloat(). **Warning: If failed to convert, it would return a undefined data!**)
-3. Cover/New a Value through assignment operator like: `root["Key"]="Hello"`, `root["Key"]=12345`, etc.
+## Simple document
+### SOL::Parser
+> #### const std::string& GetError()
+> Get error string
+
+> #### bool ParseFromFile(path)
+> Parse .sol file from **path**(C-style string or `std::string`), return true if success
+
+> #### bool ParseFromMemory(mem)
+> Parse .sol string from **mem**(C-style string or `std::string`), return true if success
+
+> #### Object GetResult()
+> return the result, the result maybe undefine when it fails to parse
+
+> #### bool ParseToFile(path, obj, flag = false)
+> Write **obj**(Object) to file **path**(C-style string or `std::string`), if **flag**(bool) is false, the output would be formatted
+
+> #### std::string ParseToString(obj, flag = false)
+> Return **obj**(Object) as a string, if **flag**(bool) is false, the string would be formatted
+
+### SOL::Object
+Alias of `std::unordered_map<std::string, Value>`
+
+### SOL::Array
+Alias of `std::vector<Value>`
+
+### SOL::Value
+#### Using constructor to assign it:
+> SOL::Value() // empty
+> 
+> SOL::Value(value) // from another SOL::Value
+> 
+> SOL::Value(object) // from another SOL::Object
+> 
+> SOL::Value(array) // from another SOL::Array
+> 
+> SOL::Value("string") // from another C-style string or std::string
+
+#### Using assign operator:
+> value = another_vale
+> 
+> value = another_object
+> 
+> ...
+
+#### Get value type:
+> value.GetType()
+
+#### Use it as Object/Array/String:
+> value.AsObject()
+> 
+> value.AsArray()
+> 
+> value.AsString()
+> 
+> (Object)value
+> 
+> (Array)value
+> 
+> (std::string)value
+> 
+If the type is not the same (eg. an object type value calls AsArray()), they would return a null value
+
+#### Operator\[\]:
+> If it is an object value, it is same as `std::unordered_map<std::string, Value>::operator[]`
+> 
+> Or it would clear itself and assign it self an empty object, then call `std::unordered_map<std::string, Value>::operator[]`
+>
+> If it is an array value, it is same as `std::vector<Value>::operator[]`
+> 
+> Or it would clear itself and assign it self an empty array, then call `std::vector<Value>::operator[]`
