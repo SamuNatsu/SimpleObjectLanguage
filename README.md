@@ -38,8 +38,8 @@ Only supports '\0', '\t', '\n', '\r', '\"', '\\' and UCS-2('\uxxxx') to be escap
 
 #include "SOL.hpp"
 
-SOL::Parser parser;
-SOL::Object obj;
+sol::Parser parser;
+sol::Object obj;
 
 int main() {
     // Read .sol file
@@ -63,7 +63,7 @@ int main() {
 ```
 
 ## Simple document
-### SOL::Parser
+### sol::Parser
 > #### const std::string& GetError()
 > Get error string
 
@@ -82,23 +82,23 @@ int main() {
 > #### std::string ParseToString(obj, flag = false)
 > Return **obj**(Object) as a string, if **flag**(bool) is false, the string would be formatted
 
-### SOL::Object
+### sol::Object
 Alias of `std::unordered_map<std::string, Value>`
 
-### SOL::Array
+### sol::Array
 Alias of `std::vector<Value>`
 
-### SOL::Value
+### sol::Value
 #### Using constructor to assign it:
-> SOL::Value() // empty
+> sol::Value() // empty
 > 
-> SOL::Value(value) // from another SOL::Value
+> sol::Value(value) // from another sol::Value
 > 
-> SOL::Value(object) // from another SOL::Object
+> sol::Value(object) // from another sol::Object
 > 
-> SOL::Value(array) // from another SOL::Array
+> sol::Value(array) // from another sol::Array
 > 
-> SOL::Value("string") // from another C-style string or std::string
+> sol::Value("string") // from another C-style string or std::string
 
 #### Using assign operator:
 > value = another_vale
