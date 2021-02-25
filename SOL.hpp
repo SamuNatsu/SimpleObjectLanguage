@@ -23,11 +23,15 @@
 **/
 
 /**
- * https://github.com/SamuNatsu/SimpleObjectLanguage
+ * Copyright (c) 2021 SamuNatsu
+ * License: MIT
+ * Author: SamuNatsu
+ * Repo: https://github.com/SamuNatsu/SimpleObjectLanguage
+ * This is a simple toolkit for SOL, see the repo for details
 **/
 
-#ifndef SOL_HPP
-#define SOL_HPP
+#ifndef SOL_TOOLKIT_HPP_
+#define SOL_TOOLKIT_HPP_
 
 #include <string>
 #include <vector>
@@ -35,12 +39,12 @@
 #include <sstream>
 #include <unordered_map>
 
-#define SOL_VERSION "2.0.0"
+#define SOL_VERSION "2.1.0"
 #define SOL_VERSION_MAJOR 2
-#define SOL_VERSION_MINOR 0
+#define SOL_VERSION_MINOR 1
 #define SOL_VERSION_PATCH 0
 
-namespace SOL {
+namespace sol {
 
 class Value;
 using Object = std::unordered_map<std::string, Value>;
@@ -55,41 +59,26 @@ enum ValueType {
 
 class Value {
     public:
-        Value() = default;
-        Value(const Value& tmp) {
-            *this = tmp;
-        }
-        Value(Value&& tmp) {
-            *this = std::forward<Value>(tmp);
-        }
-        Value(const Object& tmp) {
-            *this = tmp;
-        }
-        Value(Object&& tmp) {
-            *this = std::forward<Object>(tmp);
-        }
-        Value(const Array& tmp) {
-            *this = tmp;
-        }
-        Value(Array&& tmp) {
-            *this = std::forward<Array>(tmp);
-        }
-        Value(const std::string& tmp) {
-            *this = tmp;
-        }
-        Value(std::string&& tmp) {
-            *this = std::forward<std::string>(tmp);
-        }
-        ~Value() {
-            Clear();
-        }
+        #define _SOL_THIS_ASSIGN_ {*this = tmp;}
+        #define _SOL_THIS_MOVE_ {*this = std::forward<decltype(tmp)>(tmp);}
+            Value() = default;
+            Value(const Value& tmp) _SOL_THIS_ASSIGN_
+            Value(Value&& tmp) _SOL_THIS_MOVE_
+            Value(const Object& tmp) _SOL_THIS_ASSIGN_
+            Value(Object&& tmp) _SOL_THIS_MOVE_
+            Value(const Array& tmp) _SOL_THIS_ASSIGN_
+            Value(Array&& tmp) _SOL_THIS_MOVE_
+            Value(const std::string& tmp) _SOL_THIS_ASSIGN_
+            Value(std::string&& tmp) _SOL_THIS_MOVE_
+            ~Value() {Clear();}
+        #undef _SOL_THIS_ASSIGN_
+        #undef _SOL_THIS_MOVE_
 
         Value& operator=(const Value& tmp) {
             Clear();
             m_Type = tmp.m_Type;
             switch (m_Type) {
-                case (VALUE_NULL):
-                    break;
+                case (VALUE_NULL): break;
                 case (VALUE_OBJECT):
                     m_Data = new Object(tmp);
                     break;
@@ -110,42 +99,17 @@ class Value {
             tmp.m_Data = nullptr;
             return *this;
         }
-        Value& operator=(const Object& tmp) {
-            Clear();
-            m_Type = VALUE_OBJECT;
-            m_Data = new Object(tmp);
-            return *this;
-        }
-        Value& operator=(Object&& tmp) {
-            Clear();
-            m_Type = VALUE_OBJECT;
-            m_Data = new Object(std::forward<Object>(tmp));
-            return *this;
-        }
-        Value& operator=(const Array& tmp) {
-            Clear();
-            m_Type = VALUE_ARRAY;
-            m_Data = new Array(tmp);
-            return *this;
-        }
-        Value& operator=(Array&& tmp) {
-            Clear();
-            m_Type = VALUE_ARRAY;
-            m_Data = new Array(std::forward<Array>(tmp));
-            return *this;
-        }
-        Value& operator=(const std::string& tmp) {
-            Clear();
-            m_Type = VALUE_STRING;
-            m_Data = new std::string(tmp);
-            return *this;
-        }
-        Value& operator=(std::string&& tmp) {
-            Clear();
-            m_Type = VALUE_STRING;
-            m_Data = new std::string(std::forward<std::string>(tmp));
-            return *this;
-        }
+
+        #define _SOL_ASSIGN_(type, typename) {Clear(); m_Type = type; m_Data = new typename(tmp); return *this;}
+        #define _SOL_MOVE_(type, typename) {Clear(); m_Type = type; m_Data = new typename(std::forward<typename>(tmp)); return *this;}
+            Value& operator=(const Object& tmp) _SOL_ASSIGN_(VALUE_OBJECT, Object)
+            Value& operator=(Object&& tmp) _SOL_MOVE_(VALUE_OBJECT, Object)
+            Value& operator=(const Array& tmp) _SOL_ASSIGN_(VALUE_ARRAY, Array)
+            Value& operator=(Array&& tmp) _SOL_MOVE_(VALUE_ARRAY, Array)
+            Value& operator=(const std::string& tmp) _SOL_ASSIGN_(VALUE_STRING, std::string)
+            Value& operator=(std::string&& tmp) _SOL_MOVE_(VALUE_STRING, std::string)
+        #undef _SOL_ASSIGN_
+        #undef _SOL_MOVE_
 
         Value& operator[](const std::string& tmp) {
             return m_Type == VALUE_OBJECT ? (*(Object*)m_Data)[tmp] : (*this = Object(), (*(Object*)m_Data)[tmp]);
@@ -161,53 +125,30 @@ class Value {
             return (*(Array*)m_Data)[tmp];
         }
 
-        operator Object() const {
-            return m_Type == VALUE_OBJECT ? *(Object*)m_Data : Object();
-        }
-        operator Array() const {
-            return m_Type == VALUE_ARRAY ? *(Array*)m_Data : Array();
-        }
-        operator std::string() const {
-            return m_Type == VALUE_STRING ? *(std::string*)m_Data : std::string();
-        }
+        #define _SOL_CMP_AND_RET_(type, typename) {return m_Type == type ? *(typename*)m_Data : typename();}
+            operator Object() const _SOL_CMP_AND_RET_(VALUE_OBJECT, Object)
+            operator Array() const _SOL_CMP_AND_RET_(VALUE_ARRAY, Array)
+            operator std::string() const _SOL_CMP_AND_RET_(VALUE_STRING, std::string)
+        #undef _SOL_CMP_AND_RET_
 
-        const Object& AsObject() const {
-            static Object s_Empty;
-            return m_Type == VALUE_OBJECT ? *(Object*)m_Data : s_Empty;
-        }
-        const Array& AsArray() const {
-            static Array s_Empty;
-            return m_Type == VALUE_ARRAY ? *(Array*)m_Data : s_Empty;
-        }
-        const std::string& AsString() const {
-            static std::string s_Empty;
-            return m_Type == VALUE_STRING ? *(std::string*)m_Data : s_Empty;
-        }
+        #define _SOL_CMP_AND_RET_(type, typename) {static typename s_Empty; return m_Type == type ? *(typename*)m_Data : s_Empty;}
+            const Object& AsObject() const _SOL_CMP_AND_RET_(VALUE_OBJECT, Object)
+            const Array& AsArray() const _SOL_CMP_AND_RET_(VALUE_ARRAY, Array)
+            const std::string& AsString() const _SOL_CMP_AND_RET_(VALUE_STRING, std::string)
+        #undef _SOL_CMP_AND_RET_
 
-        void Clear() {
-            switch (m_Type) {
-                case (VALUE_NULL):
-                    break;
-                case (VALUE_OBJECT):
-                    delete (Object*)m_Data;
-                    m_Type = VALUE_NULL;
-                    m_Data = nullptr;
-                    break;
-                case (VALUE_ARRAY):
-                    delete (Array*)m_Data;
-                    m_Type = VALUE_NULL;
-                    m_Data = nullptr;
-                    break;
-                case (VALUE_STRING):
-                    delete (std::string*)m_Data;
-                    m_Type = VALUE_NULL;
-                    m_Data = nullptr;
-                    break;
+        #define _SOL_CLR_(type, typename) delete (typename*)m_Data; m_Type = type; m_Data = nullptr; break;
+            void Clear() {
+                switch (m_Type) {
+                    case (VALUE_NULL): break;
+                    case (VALUE_OBJECT): _SOL_CLR_(VALUE_OBJECT, Object)
+                    case (VALUE_ARRAY): _SOL_CLR_(VALUE_ARRAY, Array)
+                    case (VALUE_STRING): _SOL_CLR_(VALUE_STRING, std::string)
+                }
             }
-        }
-        ValueType GetType() const {
-            return m_Type;
-        }
+        #undef _SOL_CLR_
+
+        ValueType GetType() const {return m_Type;}
 
     private:
         ValueType m_Type = VALUE_NULL;
@@ -222,9 +163,7 @@ class Parser {
 
         Parser& operator=(const Parser&) = delete;
 
-        const std::string& GetError() const {
-            return m_Error;
-        }
+        const std::string& GetError() const {return m_Error;}
 
         bool ParseFromFile(const std::string& path) {
             m_Error = "";
@@ -241,9 +180,8 @@ class Parser {
             m_Result = GetObject();
             return !m_Exception;
         }
-        bool ParseFromFile(std::string&& path) {
-            return ParseFromFile(path);
-        }
+        bool ParseFromFile(std::string&& path) {return ParseFromFile(path);}
+
         bool ParseFromMemory(const std::string& mem) {
             m_Error = "";
             Open(mem, false);
@@ -256,12 +194,9 @@ class Parser {
             m_Result = GetObject();
             return !m_Exception;
         }
-        bool ParseFromMemory(std::string&& mem) {
-            return ParseFromMemory(mem);
-        }
-        Object GetResult() const {
-            return m_Result;
-        }
+        bool ParseFromMemory(std::string&& mem) {return ParseFromMemory(mem);}
+
+        Object GetResult() const {return m_Result;}
 
         bool ParseToFile(const std::string& path, const Object& obj, bool flag = false) {
             std::ofstream fout;
@@ -273,12 +208,9 @@ class Parser {
             fout.close();
             return true;
         }
-        bool ParseToFile(std::string&& path, const Object& obj, bool flag = false) {
-            return ParseToFile(path, obj, flag);
-        }
-        std::string ParseToString(const Object& obj, bool flag = false) {
-            return GenObject(obj, flag ? ~0ull : 0);
-        }
+        bool ParseToFile(std::string&& path, const Object& obj, bool flag = false) {return ParseToFile(path, obj, flag);}
+
+        std::string ParseToString(const Object& obj, bool flag = false) {return GenObject(obj, flag ? ~0ull : 0);}
 
     private:
         bool m_Flag;
@@ -311,20 +243,12 @@ class Parser {
                 m_Fin.open(tmp);
                 return m_Fin.is_open();
             }
-            else {
-                m_Sin.str(tmp);
-                return true;
-            }
+            else
+                return m_Sin.str(tmp), true;
         }
-        bool IsEOF() const {
-            return m_Flag ? m_Fin.eof() : m_Sin.eof();
-        }
-        char PeekChar() {
-            return m_Flag ? m_Fin.peek() : m_Sin.peek();
-        }
-        char GetChar() {
-            return m_Flag ? m_Fin.get() : m_Sin.get();
-        }
+        bool IsEOF() const {return m_Flag ? m_Fin.eof() : m_Sin.eof();}
+        char PeekChar() {return m_Flag ? m_Fin.peek() : m_Sin.peek();}
+        char GetChar() {return m_Flag ? m_Fin.get() : m_Sin.get();}
         void SkipChar() {
             char c = PeekChar();
             while (!isgraph(c) && c >= 0) {
@@ -337,6 +261,7 @@ class Parser {
                 c = PeekChar();
             }
         }
+
         std::string GetUnescape() {
             char c;
             std::string t;
