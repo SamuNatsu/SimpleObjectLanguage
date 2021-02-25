@@ -123,7 +123,7 @@ Alias of `std::vector<Value>`
 > 
 > (std::string)value
 > 
-If the type is not the same (eg. an object type value calls AsArray()), they would return a null value
+If the type is not the same (eg. an object type value calls AsArray()), they would return an undefined value
 
 #### Operator\[\]:
 > If it is an object value, it is same as `std::unordered_map<std::string, Value>::operator[]`
