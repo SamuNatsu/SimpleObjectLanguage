@@ -104,18 +104,18 @@ Alias of `std::vector<Value>`
 #### Get value type:
 > `value.getType()`
 
-#### Use it as Object/Array/String:
+#### Use it as Object/Array/String/Integer/Double/Bool:
 > `value.asObject()`
 > 
 > `value.asArray()`
 > 
 > `value.asString()`
 > 
-> `value.asInteger()`
+> `value.asInteger() // Base on std::string, convert to long long`
 > 
-> `value.asDouble()`
+> `value.asDouble() // Base on std::string, convert to double`
 > 
-> `value.asBool()`
+> `value.asBool() // Base on std::string, only if std::string is "true", it would return true`
 > 
 > `(Object)value`
 > 
