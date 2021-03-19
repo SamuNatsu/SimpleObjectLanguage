@@ -1,4 +1,15 @@
 /**
+ * @file SOL.hpp
+ * @author SamuNatsu
+ * @brief A simple toolkit for SOL, repo: https://github.com/SamuNatsu/SimpleObjectLanguage
+ * @version 2.2.0
+ * @date 2021-03-19
+ * 
+ * @copyright Copyright (c) 2021 SamuNatsu
+ * 
+ */
+
+/**
  * MIT License
  * 
  * Copyright (c) 2021 SamuNatsu
@@ -22,16 +33,8 @@
  * SOFTWARE.
 **/
 
-/**
- * Copyright (c) 2021 SamuNatsu
- * License: MIT
- * Author: SamuNatsu
- * Repo: https://github.com/SamuNatsu/SimpleObjectLanguage
- * This is a simple toolkit for SOL, see the repo for details
-**/
-
-#ifndef SOL_TOOLKIT_HPP_
-#define SOL_TOOLKIT_HPP_
+#ifndef SOL_TOOLKIT_HPP_INCLUDED
+#define SOL_TOOLKIT_HPP_INCLUDED
 
 #include <string>
 #include <vector>
@@ -39,19 +42,21 @@
 #include <sstream>
 #include <unordered_map>
 
-#define SOL_VERSION "2.1.0"
+#define SOL_VERSION "2.2.0"
 #define SOL_VERSION_MAJOR 2
-#define SOL_VERSION_MINOR 1
+#define SOL_VERSION_MINOR 2
 #define SOL_VERSION_PATCH 0
 
 namespace sol {
 
 class Value;
+
 using Object = std::unordered_map<std::string, Value>;
+
 using Array = std::vector<Value>;
 
 enum ValueType {
-    VALUE_NULL,
+    VALUE_NULL = 0,
     VALUE_OBJECT,
     VALUE_ARRAY,
     VALUE_STRING
@@ -93,10 +98,8 @@ class Value {
         }
         Value& operator=(Value&& tmp) {
             Clear();
-            m_Type = tmp.m_Type;
-            m_Data = tmp.m_Data;
-            tmp.m_Type = VALUE_NULL;
-            tmp.m_Data = nullptr;
+            std::swap(m_Type, tmp.m_Type);
+            std::swap(m_Data, tmp.m_Data);
             return *this;
         }
 
@@ -137,14 +140,35 @@ class Value {
             const std::string& AsString() const _SOL_CMP_AND_RET_(VALUE_STRING, std::string)
         #undef _SOL_CMP_AND_RET_
 
-        #define _SOL_CLR_(type, typename) delete (typename*)m_Data; m_Type = type; m_Data = nullptr; break;
+        long long AsInteger() const {
+            static long long s_Empty = 0, rtn;
+            static std::stringstream ss;
+            if (m_Type != VALUE_STRING)
+                return s_Empty;
+            ss.str(*this);
+            ss >> rtn;
+            return rtn;
+        }
+        double AsDouble() const {
+            static double s_Empty = 0, rtn;
+            static std::stringstream ss;
+            if (m_Type != VALUE_STRING)
+                return s_Empty;
+            ss.str(*this);
+            ss >> rtn;
+            return rtn;
+        }
+
+        #define _SOL_CLR_(typename) delete (typename*)m_Data; break;
             void Clear() {
                 switch (m_Type) {
                     case (VALUE_NULL): break;
-                    case (VALUE_OBJECT): _SOL_CLR_(VALUE_OBJECT, Object)
-                    case (VALUE_ARRAY): _SOL_CLR_(VALUE_ARRAY, Array)
-                    case (VALUE_STRING): _SOL_CLR_(VALUE_STRING, std::string)
+                    case (VALUE_OBJECT): _SOL_CLR_(Object)
+                    case (VALUE_ARRAY): _SOL_CLR_(Array)
+                    case (VALUE_STRING): _SOL_CLR_(std::string)
                 }
+                m_Type = VALUE_NULL;
+                m_Data = nullptr;
             }
         #undef _SOL_CLR_
 
@@ -153,6 +177,23 @@ class Value {
     private:
         ValueType m_Type = VALUE_NULL;
         void *m_Data = nullptr;
+};
+
+class getValue {
+    public:
+        Value operator()(const Object& obj, const std::string& key) const {
+            std::string sub = key.substr(0, key.find_first_of('.'));
+            if (obj.find(sub) == obj.end())
+                return Value();
+            if (sub == key)
+                return obj.at(sub);
+            if (obj.at(sub).GetType() != VALUE_OBJECT)
+                return Value();
+            return getValue()(obj.at(sub).AsObject(), key.substr(key.find_first_of('.') + 1));
+        }
+        Value operator()(const Object& obj, std::string&& key) const {
+            return getValue()(obj, key);
+        }
 };
 
 class Parser {
