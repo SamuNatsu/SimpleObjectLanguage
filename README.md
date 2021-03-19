@@ -1,6 +1,8 @@
 # SimpleObjectLanguage
 A simple data switching language
 
+"SOL.hpp" is a simple one-header toolkit/library for you to use SOL
+
 ## Grammar
 The file looks like this:
 ```
