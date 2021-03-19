@@ -136,14 +136,17 @@ If the type is not the same (eg. an object type value calls `asArray()`), they w
 
 ### sol::getValue
 > `sol::Value sol::getValue()(object, "a.b.c.d.e.f.g")`
+> 
 Get Value from Object, which path is "a.b.c.d.e.f.g"
 
 If path is invalid, it would return a null `sol::Value`, which type is `sol::VALUE_NULL`
 
 ### sol::convertToString
 > `std::string sol::convertToString()(object, falg = false)`
+> 
 Return **obj**(`sol::Object`) as a string, if **flag**(`bool`) is false, the string would be formatted
 
 ### sol::saveToFile
 > `bool sol::saveToFile()(path, obj, flag = false)`
+> 
 Write **obj**(`sol::Object`) to file **path**(C-style string or `std::string`), if **flag**(`bool`) is false, the output would be formatted
