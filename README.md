@@ -34,6 +34,8 @@ BNF:
 ## Something important
 Only supports '\0', '\t', '\n', '\r', '\"', '\\' and UCS-2('\uxxxx') to be escaped and unescaped in strings.
 
+It looks really similar to json, if you want to convert json to sol, just replace ':' to '=', delete double quotes before and after each key, and add double quotes before and after each value.
+
 ## How to use
 ```cpp
 #include <iostream>
