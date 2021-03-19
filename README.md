@@ -43,20 +43,20 @@ sol::Object obj;
 
 int main() {
     // Read .sol file
-    if (!parser.ParseFromFile("test.sol")) {
+    if (!parser.parseFromFile("test.sol")) {
         // Get error
-        std::cerr << parser.GetError() << std::endl;
+        std::cerr << parser.getError() << std::endl;
         return 0;
     }
     
     // Get result
-    obj = parser.GetResult();
+    obj = parser.getResult();
     
     // Modify
     obj["settings"] = "nul";
     
     // Convert object to formatted string
-    std::cout << parser.ParseToString(obj) << std::endl;
+    std::cout << sol::convertToString()(obj) << std::endl;
     
     return 0;
 }
@@ -64,23 +64,17 @@ int main() {
 
 ## Simple document
 ### sol::Parser
-> #### const std::string& GetError()
+> #### const std::string& getError()
 > Get error string
 
-> #### bool ParseFromFile(path)
+> #### bool parseFromFile(path)
 > Parse .sol file from **path**(C-style string or `std::string`), return true if success
 
-> #### bool ParseFromMemory(mem)
+> #### bool parseFromMemory(mem)
 > Parse .sol string from **mem**(C-style string or `std::string`), return true if success
 
-> #### Object GetResult()
-> return the result, the result maybe undefine when it fails to parse
-
-> #### bool ParseToFile(path, obj, flag = false)
-> Write **obj**(Object) to file **path**(C-style string or `std::string`), if **flag**(bool) is false, the output would be formatted
-
-> #### std::string ParseToString(obj, flag = false)
-> Return **obj**(Object) as a string, if **flag**(bool) is false, the string would be formatted
+> #### sol::Object getObject()
+> Return the parse result, the result maybe undefine when it fails to parse
 
 ### sol::Object
 Alias of `std::unordered_map<std::string, Value>`
@@ -90,40 +84,46 @@ Alias of `std::vector<Value>`
 
 ### sol::Value
 #### Using constructor to assign it:
-> sol::Value() // empty
+> `sol::Value() // empty`
 > 
-> sol::Value(value) // from another sol::Value
+> `sol::Value(value) // from another sol::Value`
 > 
-> sol::Value(object) // from another sol::Object
+> `sol::Value(object) // from another sol::Object`
 > 
-> sol::Value(array) // from another sol::Array
+> `sol::Value(array) // from another sol::Array`
 > 
-> sol::Value("string") // from another C-style string or std::string
+> `sol::Value("string") // from another C-style string or std::string`
 
 #### Using assign operator:
-> value = another_vale
+> `value = another_vale`
 > 
-> value = another_object
+> `value = another_object`
 > 
 > ...
 
 #### Get value type:
-> value.GetType()
+> `value.getType()`
 
 #### Use it as Object/Array/String:
-> value.AsObject()
+> `value.asObject()`
 > 
-> value.AsArray()
+> `value.asArray()`
 > 
-> value.AsString()
+> `value.asString()`
 > 
-> (Object)value
+> `value.asInteger()`
 > 
-> (Array)value
+> `value.asDouble()`
 > 
-> (std::string)value
+> `value.asBool()`
 > 
-If the type is not the same (eg. an object type value calls AsArray()), they would return an undefined value
+> `(Object)value`
+> 
+> `(Array)value`
+> 
+> `(std::string)value`
+> 
+If the type is not the same (eg. an object type value calls `asArray()`), they would return an undefined value
 
 #### Operator\[\]:
 > If it is an object value, it is same as `std::unordered_map<std::string, Value>::operator[]`
@@ -133,3 +133,17 @@ If the type is not the same (eg. an object type value calls AsArray()), they wou
 > If it is an array value, it is same as `std::vector<Value>::operator[]`
 > 
 > Or it would clear itself and assign it self an empty array, then call `std::vector<Value>::operator[]`
+
+### sol::getValue
+> `sol::Value sol::getValue()(object, "a.b.c.d.e.f.g")`
+Get Value from Object, which path is "a.b.c.d.e.f.g"
+
+If path is invalid, it would return a null `sol::Value`, which type is `sol::VALUE_NULL`
+
+### sol::convertToString
+> `std::string sol::convertToString()(object, falg = false)`
+Return **obj**(`sol::Object`) as a string, if **flag**(`bool`) is false, the string would be formatted
+
+### sol::saveToFile
+> `bool sol::saveToFile()(path, obj, flag = false)`
+Write **obj**(`sol::Object`) to file **path**(C-style string or `std::string`), if **flag**(`bool`) is false, the output would be formatted
