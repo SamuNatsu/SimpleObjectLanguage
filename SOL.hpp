@@ -2,7 +2,7 @@
  * @file SOL.hpp
  * @author SamuNatsu
  * @brief A simple toolkit for SOL, repo: https://github.com/SamuNatsu/SimpleObjectLanguage
- * @version 3.0.0
+ * @version 3.0.1
  * @date 2021-03-19
  * 
  * @copyright Copyright (c) 2021 SamuNatsu
@@ -42,10 +42,10 @@
 #include <sstream>
 #include <unordered_map>
 
-#define SOL_VERSION         "3.0.0"
+#define SOL_VERSION         "3.0.1"
 #define SOL_VERSION_MAJOR   3
 #define SOL_VERSION_MINOR   0
-#define SOL_VERSION_PATCH   0
+#define SOL_VERSION_PATCH   1
 
 namespace sol {
 
@@ -140,7 +140,7 @@ class Value {
 
         long long asInteger() const {
             static long long s_Empty = 0, rtn;
-            static std::stringstream ss;
+            std::stringstream ss;
             if (m_Type != VALUE_STRING)
                 return s_Empty;
             ss.str(*this);
@@ -149,7 +149,7 @@ class Value {
         }
         double asDouble() const {
             static double s_Empty = 0, rtn;
-            static std::stringstream ss;
+            std::stringstream ss;
             if (m_Type != VALUE_STRING)
                 return s_Empty;
             ss.str(*this);
