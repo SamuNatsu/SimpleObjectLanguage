@@ -66,6 +66,9 @@ int main() {
 }
 ```
 
+## To do
+1. Implementation of convertion between JSON and SOL
+
 ## Simple document
 ### sol::Parser
 > #### const std::string& getError()
