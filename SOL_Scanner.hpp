@@ -79,10 +79,8 @@ class Scanner {
                     p_get();
                     break;
                 default:
-                    if (isalpha(p_peek()) || p_peek() == '_') {
+                    if (isalpha(p_peek()) || p_peek() == '_')
                         p_token = p_getKey();
-                        p_get();
-                    }
                     else 
                         p_token = Token(TOKEN_ERROR, p_line, p_column, "Invalid key");
                     break;

@@ -76,7 +76,7 @@ std::vector<int> check(const Value& v, const std::vector<std::string>& ls) {
             rtn.emplace_back(-2);
             continue;
         }
-        if (check(v, i, t))
+        if (check(v, i.substr(0, p), t))
             rtn.emplace_back(1);
         else {
             rtn.emplace_back(0);
