@@ -66,21 +66,36 @@ class Value {
             p_data = new Array(t);
             return *this;
         }
-        Value& operator=(Array&& t) {return *this = t;}
+        Value& operator=(Array&& t) {
+            p_clear();
+            p_type = VALUE_ARRAY;
+            p_data = new Array(std::forward<Array>(t));
+            return *this;
+        }
         Value& operator=(const Object& t) {
             p_clear();
             p_type = VALUE_OBJECT;
             p_data = new Object(t);
             return *this;
         }
-        Value& operator=(Object&& t) {return *this = t;}
+        Value& operator=(Object&& t) {
+            p_clear();
+            p_type = VALUE_OBJECT;
+            p_data = new Object(std::forward<Object>(t));
+            return *this;
+        }
         Value& operator=(const String& t) {
             p_clear();
             p_type = VALUE_STRING;
             p_data = new String(t);
             return *this;
         }
-        Value& operator=(String&& t) {return *this = t;}
+        Value& operator=(String&& t) {
+            p_clear();
+            p_type = VALUE_STRING;
+            p_data = new String(std::forward<String>(t));
+            return *this;
+        }
         Value& operator=(long long t) {
             p_clear();
             p_type = VALUE_STRING;
@@ -111,9 +126,6 @@ class Value {
             if (p_type != VALUE_OBJECT)
                 *this = Object();
             return (*(Object*)p_data)[t];
-        }
-        Value& operator[](String&& t) {
-            return (*this)[t];
         }
 
         bool isNull() const {

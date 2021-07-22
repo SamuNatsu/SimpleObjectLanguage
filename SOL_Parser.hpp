@@ -10,81 +10,80 @@
 #include "SOL_Value.hpp"
 #include "SOL_Scanner.hpp"
 
+namespace {
+    bool _outputEscapeUnicode;
+    bool flag;
+    std::string error;
+    sol::Value result;
+}
+
 namespace sol {
 
 class Parser {
     public:
-        static bool outputEscapeUnicode;
+        Parser() = delete;
+        Parser(const Parser&) = delete;
+        ~Parser() = delete;
 
-    public:
+        Parser& operator=(const Parser&) = delete;
+
         static const std::string& error() {
-            return p_error;
+            return ::error;
         }
         static Value result() {
-            return p_result;
+            return ::result;
+        }
+
+        static void outputEscapeUnicode(bool b) {
+            ::_outputEscapeUnicode = b;
         }
 
         static bool fromFile(const std::string& path) {
             internal::Scanner sc(internal::SCAN_FILE, path);
             if (!sc.available()) {
-                p_error = "Fail to open file";
+                ::error = "Fail to open file";
                 return false;
             }
-            p_flag = true;
+            ::flag = true;
             sc.next();
             if (sc.token().type() == internal::TOKEN_LSBRACKET)
-                p_result = p_getArray(sc);
+                ::result = p_getArray(sc);
             else if (sc.token().type() == internal::TOKEN_LCBRACKET)
-                p_result = p_getObject(sc);
+                ::result = p_getObject(sc);
             else {
-                p_error = "Invalid file";
+                ::error = "Invalid file";
                 return false;
             }
-            return p_flag;
-        }
-        static bool fromFile(std::string&& path) {
-            return fromFile(path);
+            return ::flag;
         }
         static bool fromString(const std::string& str) {
             internal::Scanner sc(internal::SCAN_STRING, str);
-            p_flag = true;
+            ::flag = true;
             sc.next();
             if (sc.token().type() == internal::TOKEN_LSBRACKET)
-                p_result = p_getArray(sc);
+                ::result = p_getArray(sc);
             else if (sc.token().type() == internal::TOKEN_LCBRACKET)
-                p_result = p_getObject(sc);
+                ::result = p_getObject(sc);
             else {
-                p_error = "Invalid string";
+                ::error = "Invalid string";
                 return false;
             }
-            return p_flag;
-        }
-        static bool fromString(std::string&& str) {
-            return fromString(str);
+            return ::flag;
         }
 
         static bool toFile(const std::string& path, const Value& v) {
             FILE* fout = fopen(path.c_str(), "w");
             if (fout == nullptr) {
-                p_error = "Fail to create file";
+                ::error = "Fail to create file";
                 return false;
             }
             std::string s = toString(v);
             if (fwrite(s.c_str(), 1, s.length(), fout) != s.length()) {
-                p_error = "Incomplete output";
+                ::error = "Incomplete output";
                 return false;
             }
             fclose(fout);
             return true;
-        }
-        static bool toFile(const std::string& path, Value&& v) {
-            return toFile(path, v);
-        }
-        static bool toFile(std::string&& path, const Value& v) {
-            return toFile(path, v);
-        }
-        static bool toFile(std::string&& path, Value&& v) {
-            return toFile(path, v);
         }
         static std::string toString(const Value& v) {
             std::string rtn;
@@ -112,32 +111,20 @@ class Parser {
                 rtn = std::string("\"") + p_escape(v) + '"';
             return rtn;
         }
-        static std::string toString(Value&& v) {
-            return toString(v);
-        }
 
         static bool toFile(const std::string& path, const Value& v, size_t n, size_t off = 0) {
             FILE* fout = fopen(path.c_str(), "w");
             if (fout == nullptr) {
-                p_error = "Fail to create file";
+                ::error = "Fail to create file";
                 return false;
             }
             std::string s = toString(v, n, off);
             if (fwrite(s.c_str(), 1, s.length(), fout) != s.length()) {
-                p_error = "Incomplete output";
+                ::error = "Incomplete output";
                 return false;
             }
             fclose(fout);
             return true;
-        }
-        static bool toFile(const std::string& path, Value&& v, size_t n, size_t off = 0) {
-            return toFile(path, v, n, off);
-        }
-        static bool toFile(std::string&& path, const Value& v, size_t n, size_t off = 0) {
-            return toFile(path, v, n, off);
-        }
-        static bool toFile(std::string&& path, Value&& v, size_t n, size_t off = 0) {
-            return toFile(path, v, n, off);
         }
         static std::string toString(const Value& v, size_t n, size_t off = 0) {
             std::string rtn;
@@ -166,21 +153,8 @@ class Parser {
                 rtn = std::string("\"") + p_escape(v) + '"';
             return rtn;
         }
-        static std::string toString(Value&& v, size_t n, size_t off = 0) {
-            return toString(v, n, off);
-        }
-    
-    private:
-        static bool p_flag;
-        static std::string p_error;
-        static Value p_result;
 
     private:
-        Parser() = default;
-        Parser(const Parser&) = delete;
-        ~Parser() = default;
-        Parser& operator=(const Parser&) = delete;
-
         static Value p_getArray(internal::Scanner& sc) {
             Array rtn;
             sc.next();
@@ -193,47 +167,47 @@ class Parser {
                 else if (sc.token().type() == internal::TOKEN_VALUE)
                     t = sc.token().value();
                 else if (sc.token().type() == internal::TOKEN_ERROR) {
-                    p_flag = false;
-                    p_error = sc.token().value() + sc.token().pos();
+                    ::flag = false;
+                    ::error = sc.token().value() + sc.token().pos();
                 }
                 else {
-                    p_flag = false;
-                    p_error = std::string("Invalid array@") + sc.token().pos();
+                    ::flag = false;
+                    ::error = std::string("Invalid array@") + sc.token().pos();
                 }
-                if (!p_flag)
+                if (!::flag)
                     break;
                 rtn.emplace_back(t);
                 sc.next();
                 if (sc.token().type() == internal::TOKEN_COMMA)
                     sc.next();
                 else if (sc.token().type() != internal::TOKEN_RSBRACKET) {
-                    p_flag = false;
-                    p_error = std::string("Invalid array@") + sc.token().pos();
+                    ::flag = false;
+                    ::error = std::string("Invalid array@") + sc.token().pos();
                     break;
                 }
             }
-            return p_flag ? rtn : Array();
+            return ::flag ? rtn : Array();
         }
         static Value p_getObject(internal::Scanner& sc) {
             Object rtn;
             sc.next();
             while (sc.token().type() != internal::TOKEN_RCBRACKET) {
                 if (sc.token().type() != internal::TOKEN_KEY) {
-                    p_flag = false;
+                    ::flag = false;
                     if (sc.token().type() == internal::TOKEN_ERROR)
-                        p_error = sc.token().value() + sc.token().pos();
+                        ::error = sc.token().value() + sc.token().pos();
                     else
-                        p_error = std::string("Invalid object@") + sc.token().pos();
+                        ::error = std::string("Invalid object@") + sc.token().pos();
                     break;
                 }
                 std::string k = sc.token().value();
                 sc.next();
                 if (sc.token().type() != internal::TOKEN_EQUAL) {
-                    p_flag = false;
+                    ::flag = false;
                     if (sc.token().type() == internal::TOKEN_ERROR)
-                        p_error = sc.token().value() + sc.token().pos();
+                        ::error = sc.token().value() + sc.token().pos();
                     else
-                        p_error = std::string("Invalid object@") + sc.token().pos();
+                        ::error = std::string("Invalid object@") + sc.token().pos();
                     break;
                 }
                 Value t;
@@ -245,26 +219,26 @@ class Parser {
                 else if (sc.token().type() == internal::TOKEN_VALUE)
                     t = sc.token().value();
                 else if (sc.token().type() == internal::TOKEN_ERROR) {
-                    p_flag = false;
-                    p_error = sc.token().value() + sc.token().pos();
+                    ::flag = false;
+                    ::error = sc.token().value() + sc.token().pos();
                 }
                 else {
-                    p_flag = false;
-                    p_error = std::string("Invalid object@") + sc.token().pos();
+                    ::flag = false;
+                    ::error = std::string("Invalid object@") + sc.token().pos();
                 }
-                if (!p_flag)
+                if (!::flag)
                     break;
                 rtn[k] = t;
                 sc.next();
                 if (sc.token().type() == internal::TOKEN_COMMA)
                     sc.next();
                 else if (sc.token().type() != internal::TOKEN_RCBRACKET) {
-                    p_flag = false;
-                    p_error = std::string("Invalid object@") + sc.token().pos();
+                    ::flag = false;
+                    ::error = std::string("Invalid object@") + sc.token().pos();
                     break;
                 }
             }
-            return p_flag ? rtn : Object();
+            return ::flag ? rtn : Object();
         }
 
         static std::string p_u2x(unsigned int u, size_t len) {
@@ -288,7 +262,7 @@ class Parser {
             std::string rtn;
             for (size_t i = 0; i < const_cast<Value&>(v).string().length(); ++i) {
                 unsigned char c = const_cast<Value&>(v).string()[i];
-                if (c <= 0x7F || !outputEscapeUnicode) {
+                if (c <= 0x7F || !::_outputEscapeUnicode) {
                     switch (c) {
                         case ('\t'):
                             rtn += "\\t";
@@ -333,11 +307,6 @@ class Parser {
             return rtn;
         }
 };
-
-bool Parser::outputEscapeUnicode = true;
-bool Parser::p_flag;
-std::string Parser::p_error;
-Value Parser::p_result;
 
 }
 

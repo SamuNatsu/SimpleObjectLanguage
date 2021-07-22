@@ -92,7 +92,7 @@ class Scanner {
         ScanType p_type;
         std::ifstream p_fin;
         std::istringstream p_sin;
-        int p_line = 1, p_column = 1;
+        size_t p_line = 1, p_column = 1;
 
     private:
         bool p_eof() const {
@@ -192,7 +192,7 @@ class Scanner {
         }
 
         Token p_getValue() {
-            int line = p_line, column = p_column;
+            size_t line = p_line, column = p_column;
             p_get();
             ++p_column;
             char c = p_peek();
@@ -213,7 +213,7 @@ class Scanner {
             return Token(TOKEN_ERROR, line, column, "Incomplete value");
         }
         Token p_getKey() {
-            int line = p_line, column = p_column;
+            size_t line = p_line, column = p_column;
             std::string k(1, p_peek());
             p_get();
             ++p_column;

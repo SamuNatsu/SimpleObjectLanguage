@@ -6,9 +6,14 @@
 #include "SOL_Value.hpp"
 #include "SOL_Parser.hpp"
 
+#define SOL_VERSION "4.1.0"
+#define SOL_VERSION_MAJAR 4
+#define SOL_VERSION_MINOR 1
+#define SOL_VERSION_PATCH 0
+
 namespace sol {
 
-bool check(const Value& v, const std::string& path, ValueType type) {
+inline bool check(const Value& v, const std::string& path, ValueType type) {
     size_t p = path.find_first_of('.');
     std::string lb;
     if (p == path.npos)
@@ -43,17 +48,8 @@ bool check(const Value& v, const std::string& path, ValueType type) {
             return check(const_cast<Value&>(v).array()[a], path.substr(p + 1), type);
     }
 }
-bool check(const Value& v, std::string&& path, ValueType type) {
-    return check(v, path, type);
-}
-bool check(Value&& v, const std::string& path, ValueType type) {
-    return check(v, path, type);
-}
-bool check(Value&& v, std::string&& path, ValueType type) {
-    return check(v, path, type);
-}
 
-std::vector<int> check(const Value& v, const std::vector<std::string>& ls) {
+inline std::vector<int> check(const Value& v, const std::vector<std::string>& ls) {
     std::vector<int> rtn;
     int cnt = 0;
     for (auto& i : ls) {
@@ -85,15 +81,6 @@ std::vector<int> check(const Value& v, const std::vector<std::string>& ls) {
     }
     rtn.emplace_back(cnt);
     return rtn;
-}
-std::vector<int> check(const Value& v, std::vector<std::string>&& ls) {
-    return check(v, ls);
-}
-std::vector<int> check(Value&& v, const std::vector<std::string>& ls) {
-    return check(v, ls);
-}
-std::vector<int> check(Value&& v, std::vector<std::string>&& ls) {
-    return check(v, ls);
 }
 
 }

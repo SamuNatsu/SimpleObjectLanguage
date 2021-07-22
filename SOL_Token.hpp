@@ -21,10 +21,12 @@ using TokenType = enum _ {
 
 class Token {
     public:
-        Token(TokenType type = TOKEN_EOF, int line = 1, int column = 1, const std::string& value = std::string()):
+        Token(TokenType type = TOKEN_EOF, size_t line = 1, size_t column = 1, const std::string& value = std::string()):
             p_type(type), p_line(line), p_column(column), p_value(value) {}
-        Token(TokenType type, int line = 1, int column = 1, std::string&& value = ""):
-            p_type(type), p_line(line), p_column(column), p_value(value) {}
+        Token(TokenType type, size_t line = 1, size_t column = 1, std::string&& value = ""):
+            p_type(type), p_line(line), p_column(column) {
+            p_value.swap(value);
+        }
         Token(const Token& t):
             p_type(t.p_type), p_line(t.p_line), p_column(t.p_column), p_value(t.p_value) {}
         Token(Token&& t): p_type(t.p_type), p_line(t.p_line), p_column(t.p_column) {
@@ -59,7 +61,7 @@ class Token {
 
     private:
         TokenType p_type;
-        int p_line, p_column;
+        size_t p_line, p_column;
         std::string p_value;
 };
 
