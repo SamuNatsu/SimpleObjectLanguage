@@ -6,10 +6,10 @@
 #include "SOL_Value.hpp"
 #include "SOL_Parser.hpp"
 
-#define SOL_VERSION "4.1.0"
+#define SOL_VERSION "4.1.1"
 #define SOL_VERSION_MAJAR 4
 #define SOL_VERSION_MINOR 1
-#define SOL_VERSION_PATCH 0
+#define SOL_VERSION_PATCH 1
 
 namespace sol {
 
@@ -56,6 +56,7 @@ inline std::vector<int> check(const Value& v, const std::vector<std::string>& ls
         size_t p = i.find_first_of(':');
         if (p == i.npos) {
             rtn.emplace_back(-1);
+            ++cnt;
             continue;
         }
         std::string lb = i.substr(p + 1);
@@ -70,6 +71,7 @@ inline std::vector<int> check(const Value& v, const std::vector<std::string>& ls
             t = VALUE_NULL;
         else {
             rtn.emplace_back(-2);
+            ++cnt;
             continue;
         }
         if (check(v, i.substr(0, p), t))
